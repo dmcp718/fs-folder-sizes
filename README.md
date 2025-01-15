@@ -4,12 +4,18 @@ A high-performance directory size analyzer. This tool scans a specified director
 
 ## Setup
 
-1. Create a virtual environment:
+1. Clone the repository:
+```bash
+git clone https://github.com/dmcp718/fs-folder-sizes.git
+cd fs-folder-sizes
+```
+
+2. Create a virtual environment:
 ```bash
 python -m venv venv
 ```
 
-2. Activate the virtual environment:
+3. Activate the virtual environment:
 
 On Unix/macOS:
 ```bash
@@ -21,7 +27,7 @@ On Windows:
 .\venv\Scripts\activate
 ```
 
-3. Install requirements:
+4. Install requirements:
 ```bash
 pip install -r requirements.txt
 ```
