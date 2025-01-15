@@ -2,6 +2,30 @@
 
 A high-performance directory size analyzer. This tool scans a specified directory, calculates the size of each folder, and generates a CSV report. It uses multithreading to speed up the scanning process, making it suitable for large directories.
 
+## Setup
+
+1. Create a virtual environment:
+```bash
+python -m venv venv
+```
+
+2. Activate the virtual environment:
+
+On Unix/macOS:
+```bash
+source venv/bin/activate
+```
+
+On Windows:
+```bash
+.\venv\Scripts\activate
+```
+
+3. Install requirements:
+```bash
+pip install -r requirements.txt
+```
+
 ## Features
 
 -   **Fast Scanning:** Utilizes multithreading to scan directories quickly.
@@ -16,7 +40,7 @@ A high-performance directory size analyzer. This tool scans a specified director
 ## Usage
 
 ```bash
-./folder_sizes.py --mount-point /path/to/scan [options]
+python folder_sizes.py --mount-point /path/to/scan [options]
 ```
 
 ### Options
@@ -31,16 +55,16 @@ A high-performance directory size analyzer. This tool scans a specified director
 
 ```bash
 # Basic scan of a directory
-./folder_sizes.py --mount-point /data
+python folder_sizes.py --mount-point /data
 
 # Scan with custom output file
-./folder_sizes.py --mount-point /data --output sizes.csv
+python folder_sizes.py --mount-point /data --output sizes.csv
 
 # Include hidden files and use 16 worker threads
-./folder_sizes.py --mount-point /data --include-hidden --workers 16
+python folder_sizes.py --mount-point /data --include-hidden --workers 16
 
 # Only show sizes of top-level directories
-./folder_sizes.py --mount-point /data --top-level
+python folder_sizes.py --mount-point /data --top-level
 ```
 
 ### Example Output
@@ -103,10 +127,6 @@ Note: When using `--top-level`, only the root directory and its immediate subdir
 ## Requirements
 
 -   Python 3.7 or higher
-
-## Installation
-
-No installation is required. Simply download the `folder_sizes.py` script and run it.
 
 ## Build from Source (macOS)
 
