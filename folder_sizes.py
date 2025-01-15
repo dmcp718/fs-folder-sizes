@@ -50,6 +50,7 @@ import concurrent.futures
 import threading
 from queue import Queue, Empty
 from collections import defaultdict
+import sys
 
 @dataclass
 class ScanStats:
@@ -294,6 +295,15 @@ class FolderScanner:
         except:
             print("\nUnable to print complete summary")
 
+def get_executable_dir():
+    """Get the directory where the executable/script is located"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return Path(sys.executable).parent
+    else:
+        # Running as script
+        return Path(__file__).parent
+
 def main():
     parser = argparse.ArgumentParser(
         description='High-performance directory size scanner',
@@ -312,7 +322,8 @@ Examples:
     
     parser.add_argument('--mount-point', required=True, 
                        help='Root path to scan')
-    parser.add_argument('--output', default='folder_sizes.csv',
+    default_output = get_executable_dir() / 'folder_sizes.csv'
+    parser.add_argument('--output', default=default_output,
                        help='Output CSV file path (default: folder_sizes.csv)')
     parser.add_argument('--include-hidden', action='store_true',
                        help='Include hidden files and folders (starting with ".")')
