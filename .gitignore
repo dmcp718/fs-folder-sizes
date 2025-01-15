@@ -22,3 +22,7 @@ venv/
 .venv/
 *.csv
 prompts.txt
+# PyInstaller
+build/
+dist/
+*.spec
