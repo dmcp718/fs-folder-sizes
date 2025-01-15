@@ -11,6 +11,7 @@ A high-performance directory size analyzer. This tool scans a specified director
 -   **Handles Errors:** Gracefully handles permission errors and other issues during scanning.
 -   **Customizable:** Allows specifying the number of worker threads and whether to include hidden files.
 -   **Interruptible:** Supports graceful interruption via `Ctrl+C`, saving partial results.
+-   **Flexible Reports:** Option to show only top-level directory sizes for a concise overview.
 
 ## Usage
 
@@ -24,6 +25,7 @@ A high-performance directory size analyzer. This tool scans a specified director
 -   `--output FILE`: Output CSV file path (default: `folder_sizes.csv`).
 -   `--include-hidden`: Include hidden files and folders starting with ".".
 -   `--workers N`: Number of scanner threads (default: 8).
+-   `--top-level`: Only report sizes for top-level directories.
 
 ### Examples
 
@@ -36,6 +38,9 @@ A high-performance directory size analyzer. This tool scans a specified director
 
 # Include hidden files and use 16 worker threads
 ./folder_sizes.py --mount-point /data --include-hidden --workers 16
+
+# Only show sizes of top-level directories
+./folder_sizes.py --mount-point /data --top-level
 ```
 
 ### Example Output
@@ -67,6 +72,16 @@ Folder Path, Size
 /images,    234.56 GB
 ```
 
+With `--top-level` option:
+```csv
+Folder Path, Size
+/,          7.91 TB
+/docs,      45.67 MB
+/images,    234.56 GB
+/data,      1.23 TB
+```
+Note: When using `--top-level`, only the root directory and its immediate subdirectories are included in the report.
+
 ## How It Works
 
 1.  **Initialization:** The script takes the mount point, output file, and other options as command-line arguments.
@@ -75,7 +90,8 @@ Folder Path, Size
 4.  **Progress Tracking:** The main thread monitors the progress and prints the number of files processed.
 5.  **Cumulative Sizes:** After scanning, the script calculates the cumulative size of each directory by summing the sizes of its subdirectories.
 6.  **CSV Report:** Finally, it writes the folder paths and their sizes to a CSV file.
-7.  **Summary:** Prints a summary of total files, directories, size, scan time, and scan rate.
+7.  **Report Filtering:** If `--top-level` is specified, only root and immediate subdirectories are included in the report.
+8.  **Summary:** Prints a summary of total files, directories, size, scan time, and scan rate.
 
 ## Notes
 
