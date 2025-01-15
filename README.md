@@ -92,6 +92,22 @@ Folder Path, Size
 
 No installation is required. Simply download the `folder_sizes.py` script and run it.
 
+## Build from Source (macOS)
+
+You can build a standalone executable using PyInstaller:
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build executable
+./build.sh
+
+# The executable will be in dist/folder-sizes
+```
+
+Note: The current build configuration is optimized for macOS. For other platforms, modifications to the build script may be needed.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
