@@ -94,16 +94,14 @@ class FolderScanner:
     def __init__(self, mount_point: str, include_hidden: bool = False, max_workers: int = None, top_level: bool = False):
         self.root = Path(mount_point)
         self.include_hidden = include_hidden
-        self.max_workers = max_workers or 8
+        self.max_workers = max_workers if max_workers is not None else min(32, (os.cpu_count() or 8) * 2)
         self.top_level = top_level
         self.stats = ScanStats()
-        self.folder_sizes: Dict[str, int] = defaultdict(int)
+        self.folder_sizes = defaultdict(int)
         self._stats_lock = threading.Lock()
         self.work_queue = Queue()
-        self.processed_dirs: Set[str] = set()
+        self.processed_dirs = set()
         self._running = threading.Event()
-        self._pending_dirs = 0
-        self._pending_lock = threading.Lock()
 
     def _should_skip(self, name: str) -> bool:
         """Check if file/directory should be skipped."""
@@ -118,8 +116,8 @@ class FolderScanner:
             try:
                 directory = self.work_queue.get_nowait()
             except Empty:
-                if self.work_queue.empty():  # Double check if queue is really empty
-                    time.sleep(0.1)  # Brief pause before checking again
+                if self.work_queue.empty():
+                    time.sleep(0.05)  # Slightly longer sleep
                     if self.work_queue.empty():
                         break
                 continue
@@ -129,7 +127,7 @@ class FolderScanner:
                     dir_size = 0
                     subdirs = []
 
-                    # First pass: collect files and directories
+                    # Process files and collect directories
                     for entry in entries:
                         if self._should_skip(entry.name):
                             continue
@@ -141,22 +139,22 @@ class FolderScanner:
                                 local_counter.update(files=1, size=size)
                             elif entry.is_dir(follow_symlinks=False):
                                 subdirs.append(entry.path)
-                        except (PermissionError, OSError) as e:
-                            print(f"Error accessing {entry.path}: {e}")
+                        except (PermissionError, OSError):
+                            continue
 
-                    # Second pass: process directories
-                    for subdir in subdirs:
-                        with self._stats_lock:
+                    # Process directories
+                    with self._stats_lock:
+                        for subdir in subdirs:
                             if subdir not in self.processed_dirs:
                                 self.work_queue.put(subdir)
                                 self.processed_dirs.add(subdir)
-                                local_counter.update(dirs=1)
+                        local_counter.update(dirs=len(subdirs))
 
                     # Store directory size
                     local_sizes[str(directory)] = dir_size
 
-                    # Update global stats periodically
-                    if local_counter.files >= 1000:
+                    # Update stats every 2000 files
+                    if local_counter.files >= 2000:
                         with self._stats_lock:
                             self.stats.total_files += local_counter.files
                             self.stats.total_dirs += local_counter.dirs
@@ -166,12 +164,12 @@ class FolderScanner:
                         local_counter = BatchCounter()
                         local_sizes.clear()
 
-            except (PermissionError, OSError) as e:
-                print(f"Error scanning directory {directory}: {e}")
+            except Exception as e:
+                print(f"Error processing {directory}: {e}")
             finally:
                 self.work_queue.task_done()
 
-        # Final update of global stats
+        # Final update
         if local_counter.files > 0 or local_counter.dirs > 0:
             with self._stats_lock:
                 self.stats.total_files += local_counter.files
@@ -318,8 +316,8 @@ Examples:
                        help='Output CSV file path (default: folder_sizes.csv)')
     parser.add_argument('--include-hidden', action='store_true',
                        help='Include hidden files and folders (starting with ".")')
-    parser.add_argument('--workers', type=int, default=8,
-                       help='Number of worker threads (default: 8)')
+    parser.add_argument('--workers', type=int, default=16,
+                       help='Number of worker threads (default: 16)')
     parser.add_argument('--top-level', action='store_true',
                        help='Only report sizes for top-level directories')
     args = parser.parse_args()
